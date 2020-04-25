@@ -1,3 +1,14 @@
+.gradle
+.idea
+build
+gradle
+
+project/target
+sbt-dist
+
+target
+
+
 # Compiled class file
 *.class
 
