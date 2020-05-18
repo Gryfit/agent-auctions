@@ -1,18 +1,19 @@
 package app;
 
-import akka.actor.ActorRef;
+import akka.actor.typed.ActorRef;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class Messages {
     public interface RootMessages {}
 
     public static final class InitialiseEnvironment implements RootMessages {
-        public final Integer size;
+        public final List<BiddingStrategy> strategies;
 
-        public InitialiseEnvironment(Integer size) {
-            this.size = size;
+        public InitialiseEnvironment(List<BiddingStrategy> strategies) {
+            this.strategies = strategies;
         }
     }
 
@@ -24,19 +25,21 @@ public class Messages {
 
     public static final class AnnounceAuction implements AuctionMessagesBidder {
         public final AuctionType auctionType;
-        public final HashMap<Resource, Double> resources;
+        public final Map<Resource, Double> resources;
 
-        public AnnounceAuction(AuctionType auctionType, HashMap<Resource, Double> resources) {
+        public AnnounceAuction(AuctionType auctionType, Map<Resource, Double> resources) {
             this.auctionType = auctionType;
             this.resources = resources;
         }
     }
 
     public static final class AuctionState implements AuctionMessagesBidder {
-        public final HashMap<Resource, Double> highestBids;
+        public final Map<Resource, Double> highestBids;
+        public final ActorRef<RootMessages> replyTo;
 
-        public AuctionState(HashMap<Resource, Double> highestBids) {
+        public AuctionState(Map<Resource, Double> highestBids, ActorRef<RootMessages> replyTo) {
             this.highestBids = highestBids;
+            this.replyTo = replyTo;
         }
     }
 
@@ -50,9 +53,9 @@ public class Messages {
 
 
     public static final class JoinAuction implements AuctionMessagesRoot {
-        public final ActorRef ref;
+        public final ActorRef<Messages.AuctionMessagesBidder> ref;
 
-        public JoinAuction(ActorRef ref) {
+        public JoinAuction(ActorRef<Messages.AuctionMessagesBidder> ref) {
             this.ref =ref;
         }
     }

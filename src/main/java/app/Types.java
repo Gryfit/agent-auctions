@@ -1,9 +1,10 @@
 package app;
 
 
-import akka.actor.ActorRef;
+import akka.actor.typed.ActorRef;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.LinkedList;
 
 
@@ -21,13 +22,13 @@ enum AuctionResult {
 }
 
 final class Bid {
-    public final ActorRef actor;
-    public final Resource bidOn;
-    public final HashMap<Resource, Double> bidWith;
+    public final ActorRef<Messages.AuctionMessagesBidder> actor;
+//    public final Resource bidOn;
+    public final Map<Resource, Double> bidWith;
 
-    public Bid(ActorRef actor, Resource bidOn, HashMap<Resource, Double> bidWith) {
+    public Bid(ActorRef<Messages.AuctionMessagesBidder> actor, Map<Resource, Double> bidWith) {
         this.actor = actor;
-        this.bidOn = bidOn;
+//        this.bidOn = bidOn;
         this.bidWith = bidWith;
     }
 }
@@ -38,14 +39,18 @@ final class Bid {
 final class BidHistory {
     public LinkedList<Bid> bids = new LinkedList<>();
 
-    public BidHistory() { }
+    public BidHistory() {
+        Map<Resource, Double> first = new HashMap<>();
+        first.put(Resource.r1, 0.0);
+        bids.add(new Bid(null, first));
+    }
 
     public void addBid(Bid bid) {
         this.bids.add(bid);
     }
 
-    public HashMap<Resource, Bid> getHighestBidPerResource(){
-        return new HashMap<>();
+    public Map<Resource, Double> getHighestBidPerResource(){
+        return bids.getLast().bidWith;
     }
 }
 
