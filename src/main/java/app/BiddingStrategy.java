@@ -73,7 +73,7 @@ class LowerPrivateValueStrategy implements BiddingStrategy {
     @Override
     public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
         return privateValues.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() - Math.random()*30));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() - Math.random()*5));
     }
 
 }
@@ -87,7 +87,7 @@ class HigherPrivateValueStrategy implements BiddingStrategy {
     @Override
     public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
         return privateValues.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + Math.random()*30));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + Math.random()*5));
     }
 
 }

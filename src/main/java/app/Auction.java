@@ -82,7 +82,7 @@ class VickreyAuction implements Auction {
     public void onPlaceBid(ActorContext<Messages.RootMessages> actorContext, Map<Resource, Double> privateValues, BidHistory bidHistory, List<ActorRef<Messages.AuctionMessagesBidder>> bidders, Messages.PlaceBid msg) {
 //        System.out.println("got " + msg.bid.bidWith.getOrDefault(Resource.r1, 0.0));
         bidHistory.addBid(msg.bid);
-        if (bidHistory.bids.size() == bidders.size())
+        if (bidHistory.bids.size() == bidders.size() + 1)
         {
             Bid highest = bidHistory.getHighestBid(Resource.r1);
             Bid second = bidHistory.geSecondHighestBid(Resource.r1);

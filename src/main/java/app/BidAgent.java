@@ -47,7 +47,7 @@ public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
 
     private Behavior<Messages.AuctionMessagesBidder> onAnnounceAuction(Messages.AnnounceAuction msg){
         privateValues = msg.resources.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + (Math.random() * 10 - 5)));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + (Math.random() * 25 - 12)));
 //        System.out.println(getContext().getSelf().path() + " 1 " + privateValues.get(Resource.r1));
 //        System.out.println("privV " + biddingStrategy.toString() + " " + privateValues.get(Resource.r1));
         return this;
