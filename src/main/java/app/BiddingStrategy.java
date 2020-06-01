@@ -32,7 +32,7 @@ class BigStepsStrategy implements BiddingStrategy {
     @Override
     public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
         return auctionState.highestBids.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + 5));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + 8));
     }
 }
 
@@ -45,7 +45,7 @@ class RoundToIntegerStrategy implements BiddingStrategy {
     @Override
     public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
         return auctionState.highestBids.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> Double.valueOf(e.getValue().intValue())));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> Double.valueOf(e.getValue().intValue()+1)));
     }
 
 }

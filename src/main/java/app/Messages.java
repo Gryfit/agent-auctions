@@ -45,9 +45,11 @@ public class Messages {
 
     public static final class SendAuctionResult implements AuctionMessagesBidder {
         public final AuctionResult result;
+        public final Map<Resource, Double> toPay;
 
-        public SendAuctionResult(AuctionResult result) {
+        public SendAuctionResult(AuctionResult result, Map<Resource, Double> toPay) {
             this.result = result;
+            this.toPay = toPay;
         }
     }
 

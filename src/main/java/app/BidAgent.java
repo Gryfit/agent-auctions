@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
 
-    private final Map<Resource, Double> resources = new HashMap<>();
+    private  Map<Resource, Double> resources = new HashMap<>();
     private Map<Resource, Double> privateValues = new HashMap<>();
     private final BiddingStrategy biddingStrategy;
 
@@ -27,7 +27,8 @@ public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
         this.biddingStrategy = biddingStrategy;
         Stream
                 .of(Resource.values())
-                .forEach(k -> this.resources.put(k, Math.random() * 100));
+                .forEach(k -> this.privateValues.put(k, Math.random() * 100));
+//        System.out.println("res " + biddingStrategy.toString() + " " + privateValues.get(Resource.r1));
     }
 
     public static Behavior<Messages.AuctionMessagesBidder> create(BiddingStrategy biddingStrategy) {
@@ -45,9 +46,10 @@ public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
     }
 
     private Behavior<Messages.AuctionMessagesBidder> onAnnounceAuction(Messages.AnnounceAuction msg){
-        privateValues = msg.resources.entrySet().stream()
+        resources = msg.resources.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + (Math.random() * 10 - 5)));
 //        System.out.println(getContext().getSelf().path() + " 1 " + privateValues.get(Resource.r1));
+//        System.out.println("privV " + biddingStrategy.toString() + " " + resources.get(Resource.r1));
         return this;
     }
 
@@ -59,8 +61,11 @@ public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
     private Behavior<Messages.AuctionMessagesBidder> onAuctionState(Messages.AuctionState msg) {
 //        System.out.println(getContext().getSelf().path() + " 2 " + msg.highestBids.get(Resource.r1));
         Map<Resource, Double> newBid = biddingStrategy.newBid(privateValues, msg)
-                .entrySet().stream().filter(e -> e.getValue() > resources.getOrDefault(e.getKey(), 0.0))
+                .entrySet().stream()
+                .filter(e -> e.getValue() <= resources.getOrDefault(e.getKey(), 0.0))
+                .filter(e -> e.getValue() <= privateValues.getOrDefault(e.getKey(), 100.0))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//        System.out.println("Bidding with " + biddingStrategy.toString() + " " + newBid.getOrDefault(Resource.r1, -1.0));
         Bid bid = new Bid(getContext().getSelf(), newBid);
         msg.replyTo.tell(new Messages.PlaceBid(bid));
         return this;
@@ -68,8 +73,10 @@ public class BidAgent extends AbstractBehavior<Messages.AuctionMessagesBidder> {
 
     private Behavior<Messages.AuctionMessagesBidder> onAuctionResult(Messages.SendAuctionResult msg){
 //        System.out.println(getContext().getSelf().path() + " 3");
-        if (msg.result.equals(AuctionResult.Win)) System.out.println(biddingStrategy.toString() + " " + msg.result.toString());
-//        getContext().getSelf().tell(PoisonPill.getInstance()/);
+        if (msg.result.equals(AuctionResult.Win)) System.out.print("win " + biddingStrategy.toString());
+        msg.toPay.entrySet().stream().map(e -> privateValues.get(e.getKey()) - e.getValue()).forEach(p -> System.out.print(" " + p));
+//        System.out.println("");
+        getContext().getSelf().unsafeUpcast().tell(PoisonPill.getInstance());
 //        getContext().getSelf().tell(Kill.getInstance());
         return this;
     }
