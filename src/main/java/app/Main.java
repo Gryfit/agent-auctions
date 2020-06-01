@@ -9,13 +9,13 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         //#actor-system
         final ActorSystem<Messages.RootMessages> auctionSystem =
-                ActorSystem.create(RootAgent.create(new EnglishAuction()), "auctionActorSystem");
+                ActorSystem.create(RootAgent.create(new VickreyAuction()), "auctionActorSystem");
         //#actor-system
         List<BiddingStrategy> strategies = new LinkedList<>();
         for (int i = 0; i < 1; i++) {
-            strategies.add(new BigStepsStrategy());
-            strategies.add(new RoundToIntegerStrategy());
-            strategies.add(new SmallStepsStrategy());
+            strategies.add(new ExactlyPrivateValueStrategy());
+            strategies.add(new LowerPrivateValueStrategy());
+            strategies.add(new HigherPrivateValueStrategy());
         }
         //#main-send-messages
         auctionSystem.tell(new Messages.InitialiseEnvironment(strategies));

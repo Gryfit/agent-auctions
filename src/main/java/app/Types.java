@@ -3,6 +3,7 @@ package app;
 
 import akka.actor.typed.ActorRef;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.LinkedList;
 
 enum AuctionType {
     English,
+    Vickrey,
 }
 
 enum Resource {
@@ -49,8 +51,18 @@ final class BidHistory {
         this.bids.add(bid);
     }
 
-    public Map<Resource, Double> getHighestBidPerResource(){
+    public Map<Resource, Double> getLastBid(){
         return bids.getLast().bidWith;
+    }
+
+    public Bid getHighestBid(Resource r) {
+        Comparator<Bid> byResource = Comparator.comparing(bid -> bid.bidWith.getOrDefault(r, 0.0));
+        return bids.stream().max(byResource).get();
+    }
+
+    public Bid geSecondHighestBid(Resource r) {
+        Comparator<Bid> byResource = Comparator.comparing(bid -> bid.bidWith.getOrDefault(r, 0.0));
+        return bids.stream().sorted(byResource.reversed()).skip(1).findFirst().get();
     }
 }
 

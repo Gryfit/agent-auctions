@@ -2,7 +2,6 @@ package app;
 
 import akka.actor.PoisonPill;
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.ActorContext;
 
 import java.util.LinkedList;
@@ -26,7 +25,7 @@ class EnglishAuction implements Auction {
         Random r = new Random();
         ActorRef<Messages.AuctionMessagesBidder> bidder = bidders.get(r.nextInt(bidders.size()));
 //        System.out.println("Proposing with " + bidHistory.getHighestBidPerResource().getOrDefault(Resource.r1, -1.0));
-        bidder.tell(new Messages.AuctionState(bidHistory.getHighestBidPerResource(), actorContext.getSelf()));
+        bidder.tell(new Messages.AuctionState(bidHistory.getLastBid(), actorContext.getSelf()));
     }
 
     @Override
@@ -48,7 +47,7 @@ class EnglishAuction implements Auction {
             actorContext.stop(msg.bid.actor);
             bidders.remove(msg.bid.actor);
             if (bidders.size() == 1) {
-                bidders.get(0).tell(new Messages.SendAuctionResult(AuctionResult.Win, bidHistory.getHighestBidPerResource()));
+                bidders.get(0).tell(new Messages.SendAuctionResult(AuctionResult.Win, bidHistory.getLastBid()));
                 actorContext.getSelf().unsafeUpcast().tell(PoisonPill.getInstance());
                 return;
             }
@@ -62,5 +61,39 @@ class EnglishAuction implements Auction {
         }
 //        System.out.println(newBidders.size());
         proposeBidder(actorContext, newBidders, bidHistory);
+    }
+}
+
+class VickreyAuction implements Auction {
+
+    @Override
+    public void onInitialiseEnvironment(ActorContext<Messages.RootMessages> actorContext, Map<Resource, Double> privateValues, BidHistory bidHistory, List<ActorRef<Messages.AuctionMessagesBidder>> bidders, Messages.InitialiseEnvironment msg) {
+        int counter = 0;
+        for (BiddingStrategy strategy : msg.strategies) {
+            ActorRef<Messages.AuctionMessagesBidder> newBidder = actorContext.spawn(BidAgent.create(strategy), "Bidder_" + counter);
+            newBidder.tell(new Messages.AnnounceAuction(AuctionType.English, privateValues));
+            newBidder.tell(new Messages.AuctionState(bidHistory.getLastBid(), actorContext.getSelf()));
+            bidders.add(newBidder);
+            counter++;
+        }
+    }
+
+    @Override
+    public void onPlaceBid(ActorContext<Messages.RootMessages> actorContext, Map<Resource, Double> privateValues, BidHistory bidHistory, List<ActorRef<Messages.AuctionMessagesBidder>> bidders, Messages.PlaceBid msg) {
+//        System.out.println("got " + msg.bid.bidWith.getOrDefault(Resource.r1, 0.0));
+        bidHistory.addBid(msg.bid);
+        if (bidHistory.bids.size() == bidders.size())
+        {
+            Bid highest = bidHistory.getHighestBid(Resource.r1);
+            Bid second = bidHistory.geSecondHighestBid(Resource.r1);
+//            System.out.println("high " + highest.bidWith.getOrDefault(Resource.r1, 0.0));
+//            System.out.println("sec " + second.bidWith.getOrDefault(Resource.r1, 0.0));
+            highest.actor.tell(new Messages.SendAuctionResult(AuctionResult.Win, second.bidWith));
+            for (ActorRef<Messages.AuctionMessagesBidder> bidder : bidders)
+            {
+                if (bidder.path() != highest.actor.path()) bidder.tell(new Messages.SendAuctionResult(AuctionResult.Lose, msg.bid.bidWith));
+            }
+            actorContext.getSelf().unsafeUpcast().tell(PoisonPill.getInstance());
+        }
     }
 }
