@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 public class RootAgent extends AbstractBehavior<Messages.RootMessages> {
@@ -39,18 +40,18 @@ public class RootAgent extends AbstractBehavior<Messages.RootMessages> {
 
     private Behavior<Messages.RootMessages> onInitialiseEnvironment(Messages.InitialiseEnvironment msg){
         privateValues = new HashMap<>();
-        privateValues.put(Resource.r1, Math.random() * 100);
-//        System.out.println(getContext().getSelf().path() + " cc " + privateValues.get(Resource.r1));
+        Stream.of(Resource.values()).forEach(r -> privateValues.put(r, Math.random() * 100));
+//        privateValues.put(Resource.r1, Math.random() * 100);
+//        System.out.println(getContext().getSelf().path() + " cc " + privateValues.getOrDefault(Resource.r1, -1.0) + " " + privateValues.getOrDefault(Resource.r2, -1.0) + " " + privateValues.getOrDefault(Resource.r3, -1.0));
         auction.onInitialiseEnvironment(getContext(), privateValues, bidHistory, bidders, msg);
 //        System.out.println("init " + privateValues.getOrDefault(Resource.r1, -1.0));
         return this;
     }
 
 
-
     private Behavior<Messages.RootMessages> onPlaceBid(Messages.PlaceBid msg){
 //        System.out.println(msg.bid.bidWith.getOrDefault(Resource.r1, -1.0));
-//        System.out.println(getContext().getSelf().path() + " bb " + msg.bid.bidWith.get(Resource.r1));
+//        System.out.println(getContext().getSelf().path() + " bb " + msg.bid.bidWith.getOrDefault(Resource.r1, -1.0) + " " + msg.bid.bidWith.getOrDefault(Resource.r2, -1.0) + " " + msg.bid.bidWith.getOrDefault(Resource.r3, -1.0));
         auction.onPlaceBid(getContext(), privateValues, bidHistory, bidders, msg);
         return this;
     }

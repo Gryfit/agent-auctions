@@ -36,10 +36,18 @@ public class Messages {
     public static final class AuctionState implements AuctionMessagesBidder {
         public final Map<Resource, Double> highestBids;
         public final ActorRef<RootMessages> replyTo;
+        public final Double agentsToll;
 
         public AuctionState(Map<Resource, Double> highestBids, ActorRef<RootMessages> replyTo) {
             this.highestBids = highestBids;
             this.replyTo = replyTo;
+            this.agentsToll = 0.0;
+        }
+
+        public AuctionState(Map<Resource, Double> highestBids, ActorRef<RootMessages> replyTo, Double agentsToll) {
+            this.highestBids = highestBids;
+            this.replyTo = replyTo;
+            this.agentsToll = agentsToll;
         }
     }
 

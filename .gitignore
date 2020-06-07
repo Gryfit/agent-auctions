@@ -2,7 +2,9 @@
 .idea
 build
 gradle
-
+*.out
+*.txt
+*.sh
 project/target
 sbt-dist
 

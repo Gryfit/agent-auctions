@@ -91,3 +91,51 @@ class HigherPrivateValueStrategy implements BiddingStrategy {
     }
 
 }
+
+class RandomStrategy implements BiddingStrategy {
+    @Override
+    public String toString() {
+        return "random";
+    }
+
+    @Override
+    public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
+        return privateValues.entrySet().stream()
+                .filter(e -> auctionState.highestBids.containsKey(e.getKey()))
+                .filter(e -> Math.random() <= 0.6)
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() * Math.random()));
+    }
+
+}
+
+class ImpatientStrategy implements BiddingStrategy {
+    @Override
+    public String toString() {
+        return "impatient";
+    }
+
+    @Override
+    public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
+        return privateValues.entrySet().stream()
+                .filter(e -> auctionState.highestBids.containsKey(e.getKey()))
+                .filter(e -> Math.random() <= 0.8)
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()));
+    }
+
+}
+
+class MaximizationStrategy implements BiddingStrategy {
+    @Override
+    public String toString() {
+        return "maximization";
+    }
+
+    @Override
+    public Map<Resource, Double> newBid(Map<Resource, Double> privateValues, Messages.AuctionState auctionState) {
+        return privateValues.entrySet().stream()
+                .filter(e -> auctionState.highestBids.containsKey(e.getKey()))
+                .filter(e -> Math.random() <= 0.4)
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() * 0.5));
+    }
+
+}
